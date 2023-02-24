@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'core/cache/cache.dart';
-import 'core/files/models/folder.dart';
 
 final ProviderContainer container = ProviderContainer();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  container.read(cacheProvider).setFolder(Folder(id: 'root', name: 'root'));
+  container.read(cacheProvider);
   runApp(const MyApp());
 }
 
