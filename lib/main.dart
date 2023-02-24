@@ -2,7 +2,14 @@ import 'package:cloud_storage/router.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-void main() {
+import 'core/cache/cache.dart';
+import 'core/files/models/folder.dart';
+
+final ProviderContainer container = ProviderContainer();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  container.read(cacheProvider).setFolder(Folder(id: 'root', name: 'root'));
   runApp(const MyApp());
 }
 
@@ -11,7 +18,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
+    return UncontrolledProviderScope(
+      container: container,
       child: MaterialApp.router(
         routerConfig: router,
       ),

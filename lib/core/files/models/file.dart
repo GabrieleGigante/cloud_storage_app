@@ -1,6 +1,7 @@
-import 'package:objectbox/objectbox.dart';
+import 'package:json_annotation/json_annotation.dart';
+part 'file.g.dart';
 
-@Entity()
+@JsonSerializable(explicitToJson: true)
 class File {
   final String id;
   final String name;
@@ -16,4 +17,8 @@ class File {
     this.mimeType = '',
     this.size = 0,
   });
+
+  factory File.fromJson(Map<String, dynamic> json) => _$FileFromJson(json);
+
+  Map<String, dynamic> toJson() => _$FileToJson(this);
 }
