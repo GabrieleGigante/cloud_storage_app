@@ -32,6 +32,15 @@ class FolderPage extends ConsumerWidget {
               for (Folder folder in currentDir.folders)
                 ListTile(
                   leading: const Icon(Icons.folder),
+                  trailing: PopupMenu(
+                    onDelete: () async => ref.read(folderFromId(id).notifier).store(
+                          currentDir.copyWith(
+                            folders: currentDir.folders
+                                .where((element) => element.id != folder.id)
+                                .toList(),
+                          ),
+                        ),
+                  ),
                   onTap: () => context.push('/${folder.id}'),
                   title: Text(folder.name),
                   subtitle: Text(folder.id),
