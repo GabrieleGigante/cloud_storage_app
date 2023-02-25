@@ -48,5 +48,5 @@ jobs:
         uses: actions/deploy-pages@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PAGES_DIR: ./build/web
+          PAGES_DIR: ./web
           CLEAN: true
