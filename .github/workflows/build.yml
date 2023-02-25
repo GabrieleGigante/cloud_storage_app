@@ -42,7 +42,12 @@ jobs:
         with:
           name: web
           path: ./build
-      - name: Push changes
-        uses: ptienchuan/deploy-github-pages-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy to github pages
+        run: |
+          git config --global user.email ${{ github.actor }}@users.noreply.github.com
+          git config --global user.name ${{ github.actor }}
+          git branch gh-pages
+          git rm -r --cached 
+          git add -f ./build/web/*
+          git commit -m "Deploy to GitHub Pages"
+          git push -f origin gh-pages
