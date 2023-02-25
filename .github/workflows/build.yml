@@ -38,7 +38,7 @@ jobs:
         with:
           name: web
           path: ./build
-      - run: ls -la
+      - run: ls -la -r
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
