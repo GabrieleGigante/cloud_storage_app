@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
@@ -30,7 +30,7 @@ jobs:
           name: web
           path: ./build/web
   deploy:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest-8-cores
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -44,10 +44,13 @@ jobs:
           path: ./build
       - name: Deploy to github pages
         run: |
+          ls -la ./build/
+          ls -la ./build/web/
+          mv ./build/web ./dist
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git config --global user.name ${{ github.actor }}
           git branch gh-pages
           git rm -r --cached .
-          git add -f ./build/web/*
+          git add -f ./dist
           git commit -m "Deploy to GitHub Pages"
           git push -f origin gh-pages
