@@ -1,4 +1,5 @@
 import 'package:cloud_storage/core/files/models/folder.dart';
+import 'package:cloud_storage/core/files/providers/cwd_provider.dart';
 import 'package:cloud_storage/router.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,7 +10,11 @@ final ProviderContainer container = ProviderContainer();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  container.read(cacheProvider).setFolder(Folder(name: 'root', id: 'root', folders: [], files: []));
+  final cache = container.read(cacheProvider);
+  final cwd = container.read(cwdProvider);
+  if (await cache.getFolder(cwd.id) == null) {
+    await cache.setFolder(cwd);
+  }
   runApp(const MyApp());
 }
 

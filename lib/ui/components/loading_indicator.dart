@@ -2,22 +2,29 @@ import 'package:flutter/material.dart';
 
 class LoadingIndicator extends StatelessWidget {
   final double size;
-  final Color color;
+  final Color spinnerColor;
+  final Color backgroundColor;
 
   const LoadingIndicator({
     Key? key,
     this.size = 20,
-    this.color = Colors.white,
+    this.backgroundColor = Colors.transparent,
+    this.spinnerColor = Colors.white,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(color),
-        strokeWidth: 2,
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(spinnerColor),
+            strokeWidth: 2,
+          ),
+        ),
       ),
     );
   }

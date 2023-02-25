@@ -46,6 +46,7 @@ class NewFileOrDirDialog extends ConsumerWidget {
                 );
                 final newFolder = currentDir.copyWith(files: [...currentDir.files, newFile]);
                 ref.read(folderFromId(currentDir.id).notifier).store(newFolder);
+                ref.read(cacheProvider).setFile(newFile);
                 context.pop();
               }
             },

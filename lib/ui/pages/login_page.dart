@@ -116,7 +116,7 @@ class LoginPage extends HookConsumerWidget {
       showDialog(context: context, builder: (_) => const AlertDialog(title: Text('Login failed')));
       return;
     }
-    context.go('/root');
+    context.go('/drive:');
     isLoading.value = false;
   }
 }

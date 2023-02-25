@@ -12,21 +12,20 @@ import 'new_file_or_dir.dart';
 
 class FolderPage extends ConsumerWidget {
   final String id;
-  const FolderPage({Key? key, required this.id}) : super(key: key);
+  const FolderPage(this.id, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    dog.w(id);
-    final folderAV = ref.watch(folderFromId(id));
+    final folderValue = ref.watch(folderFromId(id));
     return Scaffold(
       appBar: AppBar(
-          title: folderAV.when(
-              data: (folder) => Text('Folder ${folder.name}'),
+          title: folderValue.when(
+              data: (folder) => Text(folder.name),
               error: (_, __) => Container(),
               loading: () => const Text('Loading...'))),
       body: RefreshIndicator(
         onRefresh: () async => ref.refresh(folderFromId(id)),
-        child: folderAV.when(
+        child: folderValue.when(
           data: (Folder currentDir) => ListView(
             children: [
               for (Folder folder in currentDir.folders)
@@ -56,19 +55,19 @@ class FolderPage extends ConsumerWidget {
                           ),
                         ),
                   ),
-                  onTap: () => dog.i('File ${file.id} tapped'),
+                  onTap: () => context.push('/file/${file.id}'),
                   title: Text(file.name),
                   subtitle: Text(file.id),
                 ),
             ],
           ),
           error: (_, __) => Center(
-            child: Text('Error: ${folderAV.error}'),
+            child: Text('Error: ${folderValue.error}'),
           ),
           loading: () => const LoadingIndicator(),
         ),
       ),
-      floatingActionButton: !folderAV.isLoading && !folderAV.hasError
+      floatingActionButton: !folderValue.isLoading && !folderValue.hasError
           ? FloatingActionButton(
               onPressed: () async {
                 showModalBottomSheet(
@@ -78,7 +77,7 @@ class FolderPage extends ConsumerWidget {
                     ),
                   ),
                   context: context,
-                  builder: (_) => NewFileOrDirDialog(folderAV.asData!.value),
+                  builder: (_) => NewFileOrDirDialog(folderValue.asData!.value),
                 );
               },
               child: const Icon(Icons.add),
