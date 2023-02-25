@@ -24,9 +24,10 @@ jobs:
         with:
           channel: 'stable'
       - run: flutter pub get
-      - run: flutter build web --release
-      - run: mv ./build/web ./dist
+      - run: flutter build web --release 
       - name: Install the Netlify CLI
         run: npm install netlify-cli -g
+      - name: Update the release number
+        run: perl -p -i -e 's/<!-- Release _ -->/<!-- Release ${{ github.run_number }} -->/g' ./build/web/index.html
       - name: Deploy the website
-        run: netlify deploy --prod --dir ./dist/ --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} --timeout=600 --message "Deployed on $(date)"
+        run: netlify deploy --prod --dir ./build/web --site=${{ secrets.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} --timeout=600 --message "Deployed on $(date)"
