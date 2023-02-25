@@ -20,7 +20,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
       - run: flutter pub get
@@ -42,15 +42,13 @@ jobs:
         with:
           name: web
           path: ./build
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      - uses: actions/deploy-pages@v3
         with:
-          path: ./build
-          name: web
-      - run: ls -la
-      - run: ls -la build
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-        with:
-          PAGES_DIR: ./build/web
+          pages-directory: ./build/web
+          commit-message: Deploy to GitHub Pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+          keep-history: true
+          force-orphan: true
+          allow-empty-commit: true
+          clean: true
+          deploy-key: ${{ secrets.DEPLOY_KEY }}
