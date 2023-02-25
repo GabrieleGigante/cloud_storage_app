@@ -16,6 +16,7 @@ class FolderPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    dog.w(id);
     final folderAV = ref.watch(folderFromId(id));
     return Scaffold(
       appBar: AppBar(

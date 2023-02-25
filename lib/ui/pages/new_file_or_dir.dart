@@ -22,7 +22,7 @@ class NewFileOrDirDialog extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Current directory: ${currentDir.id}'),
+          Text('Current directory: ${currentDir.name}'),
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -75,10 +75,10 @@ class NewFileOrDirDialog extends ConsumerWidget {
                   folders: [],
                   files: [],
                 );
-                final newFolderWithNewFolder = currentDir.copyWith(
-                  folders: [...currentDir.folders, newFolder],
-                );
-                ref.read(folderFromId(currentDir.id).notifier).store(newFolderWithNewFolder);
+                final newCurrentDir =
+                    currentDir.copyWith(folders: [...currentDir.folders, newFolder]);
+                ref.read(cacheProvider).setFolder(newFolder);
+                ref.read(folderFromId(currentDir.id).notifier).store(newCurrentDir);
               }
               context.pop();
             },

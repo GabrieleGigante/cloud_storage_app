@@ -6,10 +6,6 @@ import '../models/folder.dart';
 import '../repositories/folder_respository.dart';
 
 final folderRepositoryProvider = Provider((ref) => FolderRepository(ref));
-// final folderFromId = FutureProvider.family<Folder, String>((ref, id) async {
-//   final repo = ref.read(folderRepositoryProvider);
-//   return await repo.get(id);
-// });
 
 final folderFromId = StateNotifierProviderFamily<FolderNotifier, AsyncValue<Folder>, String>(
     (ref, String id) => FolderNotifier(ref, id));

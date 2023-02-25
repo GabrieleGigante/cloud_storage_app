@@ -1,6 +1,5 @@
-import 'package:cloud_storage/ui/pages/folder.dart';
-import 'package:cloud_storage/ui/pages/login.dart';
-import 'package:dog/dog.dart';
+import 'package:cloud_storage/ui/pages/folder_page.dart';
+import 'package:cloud_storage/ui/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
