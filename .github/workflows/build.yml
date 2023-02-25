@@ -1,0 +1,32 @@
+name: Flutter
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - run: flutter pub get
+      - run: flutter build web --release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: web
+          path: build/web
+  deploy-to-github-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: web
+          path: build/web
+      - run: echo ls
