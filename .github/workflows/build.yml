@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
@@ -30,7 +30,7 @@ jobs:
           name: web
           path: ./build/web
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -42,13 +42,7 @@ jobs:
         with:
           name: web
           path: ./build
-      - uses: actions/deploy-pages@v3
-        with:
-          pages-directory: ./build/web
-          commit-message: Deploy to GitHub Pages
-          token: ${{ secrets.GITHUB_TOKEN }}
-          keep-history: true
-          force-orphan: true
-          allow-empty-commit: true
-          clean: true
-          deploy-key: ${{ secrets.DEPLOY_KEY }}
+      - name: Push changes
+        uses: ptienchuan/deploy-github-pages-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
