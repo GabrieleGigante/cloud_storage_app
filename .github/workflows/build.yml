@@ -17,9 +17,6 @@ on:
 
 jobs:
   web:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -29,15 +26,8 @@ jobs:
       - run: flutter pub get
       - run: flutter build web --release
       - run: mv ./build/web ./dist
-      - uses: actions/configure-pages@v3
-      - name: Deploy to github pages
-        run: |
-          ls -la
-          ls -la ./dist
-          git config --global user.email ${{ github.actor }}@users.noreply.github.com
-          git config --global user.name ${{ github.actor }}
-          git branch gh-pages
-          git rm -r --cached .
-          git add -f ./dist
-          git commit -m "Deploy to GitHub Pages"
-          git push -f origin gh-pages
+      - uses: jsmrcaga/action-netlify-deploy@v1.1.0
+        with:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_DIST_DIR: ./dist
