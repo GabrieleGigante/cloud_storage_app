@@ -38,11 +38,12 @@ jobs:
         with:
           name: web
           path: ./build
-      - run: ls -la -r
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ./build/web
+          path: ./build
+          name: web
+      - run: la -la -r
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
