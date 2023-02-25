@@ -1,8 +1,13 @@
 name: Flutter
 
 concurrency:
-  group: ${{ github.ref }}
+  group: pages
   cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 on:
   push:
@@ -12,7 +17,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
@@ -25,12 +30,11 @@ jobs:
           name: web
           path: ./build/web
   deploy:
-    permissions: write-all
+    runs-on: self-hosted
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     needs: build
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/configure-pages@v3
@@ -43,7 +47,10 @@ jobs:
         with:
           path: ./build
           name: web
-      - run: ls -la -r
+      - run: ls -la
+      - run: ls -la build
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
+        with:
+          PAGES_DIR: ./build/web
