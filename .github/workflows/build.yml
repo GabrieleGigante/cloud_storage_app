@@ -23,7 +23,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: web
-          path: build/web
+          path: ./build/web
   deploy:
     permissions: write-all
     environment:
@@ -37,10 +37,11 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: web
+          path: ./build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: build/web
+          path: ./build
           name: web
       - name: Deploy to GitHub Pages
         id: deployment
