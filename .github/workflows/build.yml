@@ -25,10 +25,11 @@ jobs:
           channel: 'stable'
       - run: flutter pub get
       - run: flutter build web --release
+      - run: mv ./build/web ./dist
       - uses: actions/upload-artifact@v2
         with:
-          name: web
-          path: ./build/web
+          name: ./dist
+          path: ./dist
   deploy:
     runs-on: ubuntu-latest
     environment:
@@ -40,12 +41,12 @@ jobs:
       - uses: actions/configure-pages@v3
       - uses: actions/download-artifact@v2
         with:
-          name: web
-          path: ./build
+          name: ./dist
+          path: ./
       - name: Deploy to github pages
         run: |
-          ls -la ./build/
-          ls -la ./build/web/
+          ls -la
+          ls -la ./dist
           mv ./build/web ./dist
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git config --global user.name ${{ github.actor }}
