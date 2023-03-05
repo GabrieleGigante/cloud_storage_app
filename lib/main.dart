@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
     return UncontrolledProviderScope(
       container: container,
       child: MaterialApp.router(
+        title: 'Cloud Storage',
         routerConfig: router,
       ),
     );

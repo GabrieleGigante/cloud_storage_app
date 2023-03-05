@@ -7,6 +7,7 @@ import 'ui/pages/file_viewer.dart';
 
 GoRouter router = GoRouter(
   debugLogDiagnostics: true,
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',

@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/cache/cache.dart';
 import '../../core/files/models/file.dart';
 import '../components/create_folder_dialog.dart';
+import 'package:image/image.dart';
 
 class NewFileOrDirDialog extends ConsumerWidget {
   final Folder currentDir;
@@ -47,6 +48,16 @@ class NewFileOrDirDialog extends ConsumerWidget {
                 final newFolder = currentDir.copyWith(files: [...currentDir.files, newFile]);
                 ref.read(folderFromId(currentDir.id).notifier).store(newFolder);
                 ref.read(cacheProvider).setFile(newFile);
+                // TODO: remove when the backend is ready
+                ref.read(cacheProvider).setContent(uuid, file.bytes!);
+                if (newFile.isImage) {
+                  final image = decodeImage(file.bytes!);
+                  final resized = copyResize(image!, width: 200);
+                  final preview = encodeNamedImage('${file.name}.${file.extension}', resized);
+                  if (preview != null) {
+                    ref.read(cacheProvider).setContent('preview_$uuid', preview);
+                  }
+                }
                 context.pop();
               }
             },

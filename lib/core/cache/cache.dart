@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -7,6 +8,7 @@ import '../files/models/folder.dart';
 class Cache {
   late Box<Folder> _folderBox;
   late Box<File> _fileBox;
+  late Box<Uint8List> _contentBox;
   bool _isInitialized = false;
 
   Future<void> init() async {
@@ -22,6 +24,7 @@ class Cache {
     }
     _folderBox = await Hive.openBox<Folder>('folders');
     _fileBox = await Hive.openBox<File>('files');
+    _contentBox = await Hive.openBox<Uint8List>('content');
     _isInitialized = true;
   }
 
@@ -65,6 +68,27 @@ class Cache {
       await init();
     }
     await _fileBox.delete(id);
+  }
+
+  Future<Uint8List?> getContent(String id) async {
+    if (!_isInitialized) {
+      await init();
+    }
+    return _contentBox.get(id);
+  }
+
+  Future<void> setContent(String id, Uint8List content) async {
+    if (!_isInitialized) {
+      await init();
+    }
+    await _contentBox.put(id, content);
+  }
+
+  Future<void> deleteContent(String id) async {
+    if (!_isInitialized) {
+      await init();
+    }
+    await _contentBox.delete(id);
   }
 }
 

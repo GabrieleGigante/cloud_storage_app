@@ -1,6 +1,7 @@
 import 'package:cloud_storage/core/files/models/file.dart';
 import 'package:cloud_storage/core/files/providers/folder_provider.dart';
 import 'package:cloud_storage/ui/components/loading_indicator.dart';
+import 'package:cloud_storage/ui/components/preview_widget.dart';
 import 'package:dog/dog.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -46,7 +47,7 @@ class FolderPage extends ConsumerWidget {
                 ),
               for (File file in currentDir.files)
                 ListTile(
-                  leading: Icon(file.isImage ? Icons.image : Icons.document_scanner),
+                  leading: SizedBox(height: 50, width: 50, child: PreviewWidget(file)),
                   trailing: PopupMenu(
                     onDelete: () async => ref.read(folderFromId(id).notifier).store(
                           currentDir.copyWith(
