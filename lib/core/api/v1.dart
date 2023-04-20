@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:io' show HttpStatus;
-import 'package:cloud_storage/core/api/http_client.dart';
-import 'package:dartz/dartz.dart';
+import 'package:cloud_storage/core/files/services/token.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../files/models/file.dart';
 import '../files/models/folder.dart';
 import 'types.dart';
 import 'package:http/http.dart' as http;
@@ -14,28 +12,26 @@ class APIV1 {
   static Duration timeout = const Duration(seconds: 10);
 
   /// Login with username and password.
-  // static Future<HTTPResponse> login(String email, String pw, bool keepLogin) async {
-  //   await Future.delayed(const Duration(seconds: 2));
-  //   if (email == 'error' || pw == 'error') {
-  //     return HTTPResponse(
-  //         HttpStatus.badRequest, {'code': '001', 'message': 'Invalid email or pw'}, const {});
-  //   }
-  //   final res = HTTPResponse(HttpStatus.ok, {'token': 'tokenValue'}, const {});
-  //   // set token to shared preferences
-  //   return res;
-  // }
-
-  /// Get file from id.
-  // static Future<HTTPResponse> getFile(String id) async {
-  //   await Future.delayed(const Duration(seconds: 2));
-  //   if (id == 'error') {
-  //     return HTTPResponse(
-  //         HttpStatus.badRequest, {'code': '001', 'message': 'Invalid email or pw'}, const {});
-  //   }
-  //   final res = HTTPResponse(HttpStatus.ok, {}, const {});
-  //   // set token to shared preferences
-  //   return res;
-  // }
+  /// returns the decoded JWT token in a Map.
+  static Future<Map<String, dynamic>> login(String email, String password) async {
+    final res = await http
+        .post(
+          Uri.parse('$baseUrl/auth/login'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({'email': email, 'password': password}),
+        )
+        .timeout(timeout);
+    if (res.statusCode >= 400) {
+      throw APIException.fromResponse(res);
+    }
+    final json = jsonDecode(res.body);
+    final sp = await SharedPreferences.getInstance();
+    sp.setString('refresh_token', json['refresh_token']);
+    token = json['access_token'];
+    return decodeJWT(token);
+  }
 
   /// Get folder from id.
   static Future<Folder> getFolder(String id, {bool populate = true}) async {
@@ -49,4 +45,35 @@ class APIV1 {
     final json = jsonDecode(res.body);
     return Folder.fromJson(json);
   }
+
+  /// Create folder
+  static Future<void> setFolder(Folder f) async {
+    final dto = FolderDTO.fromFolder(f);
+    // final body = jsonEncode(dto);
+    final res = await http.post(Uri.parse('$baseUrl/dir/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+        body: dto);
+    if (res.statusCode >= 400) {
+      throw APIException.fromResponse(res);
+    }
+  }
+
+  /// Delete folder
+  static Future<void> deleteFolder(String id) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/dir/$id'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (res.statusCode >= 400) {
+      throw APIException.fromResponse(res);
+    }
+  }
+
+  // static Future<void> renameDir(String id, String newName) async {
+  //   await setFolder(Folder(id: id, name: newName, files: [], folders: []));
+  // }
 }

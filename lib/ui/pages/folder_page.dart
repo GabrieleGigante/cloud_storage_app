@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../core/files/models/file.dart';
 import '../../core/files/models/folder.dart';
 import '../../core/files/providers/folder_provider.dart';
+import '../components/drawer.dart';
 import '../components/loading_indicator.dart';
 import '../components/popup_menu.dart';
 import '../components/preview_widget.dart';
@@ -16,9 +17,15 @@ class FolderPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     final folderValue = ref.watch(folderFromId(id));
     return Scaffold(
+      key: scaffoldKey,
+      drawer: const LeadingDrawer(),
       appBar: AppBar(
+          leading: IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => scaffoldKey.currentState?.openDrawer()),
           title: folderValue.when(
               data: (folder) => Text(folder.name),
               error: (_, __) => Row(
@@ -32,7 +39,7 @@ class FolderPage extends ConsumerWidget {
                           ))
                     ],
                   ),
-              loading: () => const Text('Loading...'))),
+              loading: () => const SizedBox())),
       body: RefreshIndicator(
         onRefresh: () async => ref.refresh(folderFromId(id)),
         child: folderValue.when(

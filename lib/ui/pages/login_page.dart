@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:math' show min;
+
 import 'package:cloud_storage/ui/components/loading_indicator.dart';
 import 'package:dog/dog.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +14,8 @@ class LoginPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final email = TextEditingController();
-    final pw = TextEditingController();
+    final email = useTextEditingController();
+    final pw = useTextEditingController();
     final keepLogin = useState(false);
     final showPwd = useState(false);
     final isLoading = useState(false);
@@ -110,14 +113,16 @@ class LoginPage extends HookConsumerWidget {
     }
     APIV1.baseUrl = 'http://localhost:8080';
     isLoading.value = true;
-    // final res = await APIV1.login(email, pw, keepLogin);
-    // if (res.isError) {
-    //   dog.e(res.body);
-    //   isLoading.value = false;
-    //   showDialog(context: context, builder: (_) => const AlertDialog(title: Text('Login failed')));
-    //   return;
-    // }
-    context.go('/test-root');
+    try {
+      log('$email, $pw');
+      final token = await APIV1.login(email, pw);
+      print(token);
+
+      // ignore: use_build_context_synchronously
+      context.go('/test-root');
+    } catch (e) {
+      print(e);
+    }
     isLoading.value = false;
   }
 }

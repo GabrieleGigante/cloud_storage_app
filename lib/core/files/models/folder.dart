@@ -1,8 +1,9 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import './file.dart';
 
-import 'package:json_annotation/json_annotation.dart';
 part 'folder.g.dart';
 
 @HiveType(typeId: 1)
@@ -55,4 +56,29 @@ class Folder {
   factory Folder.fromJson(Map<String, dynamic> json) => _$FolderFromJson(json);
 
   Map<String, dynamic> toJson() => _$FolderToJson(this);
+}
+
+class FolderDTO {
+  String id;
+  String name;
+  String parentFolderId;
+  List<String> folders;
+  List<String> files;
+  FolderDTO({
+    this.id = '',
+    this.name = '',
+    this.parentFolderId = '',
+    this.folders = const [],
+    this.files = const [],
+  });
+
+  factory FolderDTO.fromFolder(Folder f) {
+    return FolderDTO(
+      id: f.id,
+      name: f.name,
+      parentFolderId: f.parentFolderId,
+      folders: f.folders.map((e) => e.id).toList(),
+      files: f.files.map((e) => e.id).toList(),
+    );
+  }
 }
