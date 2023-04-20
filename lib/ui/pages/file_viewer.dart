@@ -1,17 +1,14 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:universal_html/html.dart';
+import 'package:universal_html/html.dart' show AnchorElement;
 
 import '../../core/files/providers/content_provider.dart';
 import '../../core/files/providers/file_provider.dart';
-import '../../core/files/providers/folder_provider.dart';
 import '../components/image_widget.dart';
 import '../components/loading_indicator.dart';
-import '../components/popup_menu.dart';
 
 class FileViewer extends ConsumerWidget {
   final String id;

@@ -108,15 +108,16 @@ class LoginPage extends HookConsumerWidget {
     if (isLoading.value) {
       return;
     }
+    APIV1.baseUrl = 'http://localhost:8080';
     isLoading.value = true;
-    final res = await APIV1.login(email, pw, keepLogin);
-    if (res.isError) {
-      dog.e(res.body);
-      isLoading.value = false;
-      showDialog(context: context, builder: (_) => const AlertDialog(title: Text('Login failed')));
-      return;
-    }
-    context.go('/drive');
+    // final res = await APIV1.login(email, pw, keepLogin);
+    // if (res.isError) {
+    //   dog.e(res.body);
+    //   isLoading.value = false;
+    //   showDialog(context: context, builder: (_) => const AlertDialog(title: Text('Login failed')));
+    //   return;
+    // }
+    context.go('/test-root');
     isLoading.value = false;
   }
 }

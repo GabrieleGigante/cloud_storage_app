@@ -1,3 +1,5 @@
+import 'package:cloud_storage/core/api/v1.dart';
+import 'package:dartz/dartz.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../cache/cache.dart';
@@ -6,28 +8,28 @@ import '../models/folder.dart';
 
 class FolderRepository implements CrudRepository<Folder> {
   final Ref _ref;
-  final Cache cache;
 
-  FolderRepository(this._ref) : cache = _ref.read(cacheProvider);
+  FolderRepository(this._ref);
 
   @override
   Future<Folder> get(String id) async {
-    final f = await cache.getFolder(id);
-    if (f != null) {
-      return f;
-    }
-    return Folder(folders: [], files: []);
+    // final f = await cache.getFolder(id);
+    // if (f != null) {
+    //   return f;
+    // }
+    // return Folder(folders: [], files: []);
+    return await APIV1.getFolder(id);
   }
 
   @override
   Future<Folder?> store(Folder folder) async {
-    await cache.setFolder(folder);
+    await Cache().setFolder(folder);
     return folder;
   }
 
   @override
   Future<Folder?> delete(String id) async {
-    await cache.deleteFolder(id);
+    await Cache().deleteFolder(id);
     return null;
   }
 }

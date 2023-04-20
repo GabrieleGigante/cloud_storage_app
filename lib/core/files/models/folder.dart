@@ -15,8 +15,10 @@ class Folder {
   @HiveField(2)
   String parentFolderId;
   @HiveField(3)
+  @JsonKey(defaultValue: [])
   List<Folder> folders;
   @HiveField(4)
+  @JsonKey(defaultValue: [])
   List<File> files;
 
   bool get canPop => parentFolderId.isNotEmpty;

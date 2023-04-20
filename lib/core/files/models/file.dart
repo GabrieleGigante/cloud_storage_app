@@ -3,7 +3,10 @@ import 'package:json_annotation/json_annotation.dart';
 part 'file.g.dart';
 
 @HiveType(typeId: 2)
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(
+  explicitToJson: true,
+  includeIfNull: false,
+)
 class File {
   @HiveField(0)
   final String id;

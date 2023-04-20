@@ -1,14 +1,13 @@
-import 'package:cloud_storage/core/files/models/file.dart';
-import 'package:cloud_storage/core/files/providers/folder_provider.dart';
-import 'package:cloud_storage/ui/components/loading_indicator.dart';
-import 'package:cloud_storage/ui/components/preview_widget.dart';
-import 'package:dog/dog.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../core/files/models/file.dart';
 import '../../core/files/models/folder.dart';
+import '../../core/files/providers/folder_provider.dart';
+import '../components/loading_indicator.dart';
 import '../components/popup_menu.dart';
+import '../components/preview_widget.dart';
 import 'new_file_or_dir.dart';
 
 class FolderPage extends ConsumerWidget {
@@ -22,7 +21,17 @@ class FolderPage extends ConsumerWidget {
       appBar: AppBar(
           title: folderValue.when(
               data: (folder) => Text(folder.name),
-              error: (_, __) => Container(),
+              error: (_, __) => Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                          onPressed: () => ref.refresh(folderFromId(id)),
+                          icon: const Icon(
+                            Icons.refresh,
+                            color: Colors.white,
+                          ))
+                    ],
+                  ),
               loading: () => const Text('Loading...'))),
       body: RefreshIndicator(
         onRefresh: () async => ref.refresh(folderFromId(id)),
@@ -62,9 +71,11 @@ class FolderPage extends ConsumerWidget {
                 ),
             ],
           ),
-          error: (_, __) => Center(
-            child: Text('Error: ${folderValue.error}'),
-          ),
+          error: (err, stack) {
+            return Center(
+              child: Text(err.toString()),
+            );
+          },
           loading: () => const LoadingIndicator(),
         ),
       ),

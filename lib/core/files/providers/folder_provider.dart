@@ -1,6 +1,5 @@
 import 'package:cloud_storage/core/files/interfaces/crud_repository.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../cache/cache.dart';
 import '../models/folder.dart';
 import '../repositories/folder_respository.dart';
@@ -24,7 +23,8 @@ class FolderNotifier extends StateNotifier<AsyncValue<Folder>> {
   Future<void> get() async {
     state = const AsyncLoading();
     try {
-      state = AsyncData(await repo.get(id));
+      final folder = await repo.get(id);
+      state = AsyncData(folder);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
     }

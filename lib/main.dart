@@ -12,6 +12,7 @@ final ProviderContainer container = ProviderContainer();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
+  await initCache();
   final cache = container.read(cacheProvider);
   final cwd = container.read(cwdProvider);
   if (await cache.getFolder(cwd.id) == null) {

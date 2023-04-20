@@ -60,9 +60,10 @@ Folder _$FolderFromJson(Map<String, dynamic> json) => Folder(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       parentFolderId: json['parentFolderId'] as String? ?? '',
-      folders: (json['folders'] as List<dynamic>)
-          .map((e) => Folder.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      folders: (json['folders'] as List<dynamic>?)
+              ?.map((e) => Folder.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       files: (json['files'] as List<dynamic>)
           .map((e) => File.fromJson(e as Map<String, dynamic>))
           .toList(),
