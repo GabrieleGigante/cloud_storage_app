@@ -19,10 +19,27 @@ class FolderPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scaffoldKey = GlobalKey<ScaffoldState>();
     final folderValue = ref.watch(folderFromId(id));
+    final notifier = ref.read(folderFromId(id).notifier);
+    final parentId = folderValue.asData?.value.parentDirectory ?? '';
     return Scaffold(
       key: scaffoldKey,
       drawer: const LeadingDrawer(),
       appBar: AppBar(
+          bottom: parentId.isNotEmpty
+              ? PreferredSize(
+                  preferredSize: const Size.fromHeight(20),
+                  child: TextButton(
+                    onPressed: () {
+                      context.go('/$parentId');
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.adaptive.arrow_back, color: Colors.white, size: 16),
+                        const Text('Back', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ))
+              : null,
           leading: IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () => scaffoldKey.currentState?.openDrawer()),
@@ -47,35 +64,40 @@ class FolderPage extends ConsumerWidget {
             children: [
               for (Folder folder in currentDir.folders)
                 ListTile(
-                  leading: const Icon(Icons.folder),
-                  trailing: PopupMenu(
-                    onDelete: () async => ref.read(folderFromId(id).notifier).store(
-                          currentDir.copyWith(
-                            folders: currentDir.folders
-                                .where((element) => element.id != folder.id)
-                                .toList(),
-                          ),
-                        ),
+                  leading: const SizedBox(
+                    height: 50,
+                    width: 50,
+                    child: Icon(Icons.folder),
                   ),
+                  trailing: PopupMenu(onDelete: () async => notifier.deleteFolder(folder.id)),
                   onTap: () => context.push('/${folder.id}'),
                   title: Text(folder.name),
-                  subtitle: Text(folder.id),
+                  subtitle: Text(folder.id.split('-').last),
                 ),
               for (File file in currentDir.files)
                 ListTile(
-                  leading: SizedBox(height: 50, width: 50, child: PreviewWidget(file)),
-                  trailing: PopupMenu(
-                    onDelete: () async => ref.read(folderFromId(id).notifier).store(
-                          currentDir.copyWith(
-                            files:
-                                currentDir.files.where((element) => element.id != file.id).toList(),
-                          ),
-                        ),
-                  ),
-                  onTap: () => context.push('/file/${file.id}'),
-                  title: Text(file.name),
-                  subtitle: Text(file.id),
-                ),
+                    leading: SizedBox(height: 50, width: 50, child: PreviewWidget(file)),
+                    trailing: PopupMenu(onDelete: () async => notifier.deleteFolder(id)),
+                    onTap: () => context.push('/file/${file.id}'),
+                    title: Text(file.name),
+                    subtitle: Builder(builder: (context) {
+                      String size = '';
+                      final kb = file.size / 1024;
+                      final mb = kb / 1024;
+                      final gb = mb / 1024;
+                      if (gb > 1) {
+                        size = '${gb.toStringAsFixed(2)} GB';
+                      } else if (mb > 1) {
+                        size = '${mb.toStringAsFixed(2)} MB';
+                      } else if (kb > 1) {
+                        size = '${kb.toStringAsFixed(2)} KB';
+                      } else {
+                        size = '${file.size} B';
+                      }
+                      final shortId = file.cid.substring(0, 12);
+                      // size + shortid divided by central dot
+                      return Text('$size · $shortId');
+                    })),
             ],
           ),
           error: (err, stack) {

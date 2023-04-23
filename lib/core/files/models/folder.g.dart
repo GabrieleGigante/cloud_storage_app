@@ -19,7 +19,7 @@ class FolderAdapter extends TypeAdapter<Folder> {
     return Folder(
       id: fields[0] as String,
       name: fields[1] as String,
-      parentFolderId: fields[2] as String,
+      parentDirectory: fields[2] as String,
       folders: (fields[3] as List).cast<Folder>(),
       files: (fields[4] as List).cast<File>(),
     );
@@ -34,7 +34,7 @@ class FolderAdapter extends TypeAdapter<Folder> {
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.parentFolderId)
+      ..write(obj.parentDirectory)
       ..writeByte(3)
       ..write(obj.folders)
       ..writeByte(4)
@@ -59,20 +59,42 @@ class FolderAdapter extends TypeAdapter<Folder> {
 Folder _$FolderFromJson(Map<String, dynamic> json) => Folder(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      parentFolderId: json['parentFolderId'] as String? ?? '',
+      parentDirectory: json['parentDirectory'] as String? ?? '',
       folders: (json['folders'] as List<dynamic>?)
               ?.map((e) => Folder.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      files: (json['files'] as List<dynamic>)
-          .map((e) => File.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      files: (json['files'] as List<dynamic>?)
+              ?.map((e) => File.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$FolderToJson(Folder instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'parentFolderId': instance.parentFolderId,
+      'parentDirectory': instance.parentDirectory,
       'folders': instance.folders.map((e) => e.toJson()).toList(),
       'files': instance.files.map((e) => e.toJson()).toList(),
+    };
+
+FolderDTO _$FolderDTOFromJson(Map<String, dynamic> json) => FolderDTO(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      parentDirectory: json['parentDirectory'] as String? ?? '',
+      folders: (json['folders'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      files:
+          (json['files'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
+    );
+
+Map<String, dynamic> _$FolderDTOToJson(FolderDTO instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'parentDirectory': instance.parentDirectory,
+      'folders': instance.folders,
+      'files': instance.files,
     };

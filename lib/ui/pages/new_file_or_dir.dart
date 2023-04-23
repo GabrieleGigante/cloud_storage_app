@@ -18,6 +18,8 @@ class NewFileOrDirDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(folderFromId(currentDir.id).notifier);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 22.0),
       child: Column(
@@ -35,31 +37,18 @@ class NewFileOrDirDialog extends ConsumerWidget {
             ),
             onTap: () async {
               final res = await FilePicker.platform.pickFiles();
-              if (res != null) {
-                final file = res.files.first;
-                final uuid = const Uuid().v4();
-                final newFile = File(
-                  id: uuid,
-                  name: file.name,
-                  extension: file.extension ?? '',
-                  mimeType: extensionToMimetype(file.extension ?? ''),
-                  size: file.size,
-                );
-                final newFolder = currentDir.copyWith(files: [...currentDir.files, newFile]);
-                ref.read(folderFromId(currentDir.id).notifier).store(newFolder);
-                ref.read(cacheProvider).setFile(newFile);
-                // TODO: remove when the backend is ready
-                ref.read(cacheProvider).setContent(uuid, file.bytes!);
-                if (newFile.isImage) {
-                  final image = decodeImage(file.bytes!);
-                  final resized = copyResize(image!, width: 200);
-                  final preview = encodeNamedImage('${file.name}.${file.extension}', resized);
-                  if (preview != null) {
-                    ref.read(cacheProvider).setContent('preview_$uuid', preview);
-                  }
-                }
-                context.pop();
+              if (res == null) {
+                return;
               }
+              final file = res.files.first;
+              final bool error = await notifier.uploadFile(file);
+              if (error) {
+                // ignore: use_build_context_synchronously
+                await showDialog(
+                    context: context, builder: (_) => const AlertDialog(title: Text('Error')));
+              }
+              // ignore: use_build_context_synchronously
+              context.pop();
             },
           ),
           const Divider(),
@@ -81,16 +70,14 @@ class NewFileOrDirDialog extends ConsumerWidget {
               if (folderName.isNotEmpty) {
                 final uuid = const Uuid().v4();
                 final newFolder = Folder(
-                  parentFolderId: currentDir.id,
+                  parentDirectory: currentDir.id,
                   id: uuid,
                   name: folderName,
                   folders: [],
                   files: [],
                 );
-                final newCurrentDir =
-                    currentDir.copyWith(folders: [...currentDir.folders, newFolder]);
-                ref.read(cacheProvider).setFolder(newFolder);
-                ref.read(folderFromId(currentDir.id).notifier).store(newCurrentDir);
+                // ref.read(folderFromId(newFolder.parentFolderId)).
+                notifier.storeFolder(newFolder);
               }
               context.pop();
             },

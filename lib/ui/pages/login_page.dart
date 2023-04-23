@@ -111,11 +111,11 @@ class LoginPage extends HookConsumerWidget {
     if (isLoading.value) {
       return;
     }
-    APIV1.baseUrl = 'http://localhost:8080';
+    API.baseUrl = 'http://localhost:8080';
     isLoading.value = true;
     try {
       log('$email, $pw');
-      final token = await APIV1.login(email, pw);
+      final token = await API.login(email, pw);
       print(token);
 
       // ignore: use_build_context_synchronously

@@ -7,14 +7,14 @@ import './file.dart';
 part 'folder.g.dart';
 
 @HiveType(typeId: 1)
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, createToJson: true)
 class Folder {
   @HiveField(0)
   String id;
   @HiveField(1)
   String name;
   @HiveField(2)
-  String parentFolderId;
+  String parentDirectory;
   @HiveField(3)
   @JsonKey(defaultValue: [])
   List<Folder> folders;
@@ -22,12 +22,12 @@ class Folder {
   @JsonKey(defaultValue: [])
   List<File> files;
 
-  bool get canPop => parentFolderId.isNotEmpty;
+  bool get canPop => parentDirectory.isNotEmpty;
 
   Folder({
     this.id = '',
     this.name = '',
-    this.parentFolderId = '',
+    this.parentDirectory = '',
     required this.folders,
     required this.files,
   });
@@ -35,14 +35,14 @@ class Folder {
   Folder copyWith({
     String? id,
     String? name,
-    String? parentFolderId,
+    String? parentDirectory,
     List<Folder>? folders,
     List<File>? files,
   }) {
     return Folder(
       id: id ?? this.id,
       name: name ?? this.name,
-      parentFolderId: parentFolderId ?? this.parentFolderId,
+      parentDirectory: parentDirectory ?? this.parentDirectory,
       folders: folders ?? this.folders,
       files: files ?? this.files,
     );
@@ -58,16 +58,17 @@ class Folder {
   Map<String, dynamic> toJson() => _$FolderToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true, createToJson: true)
 class FolderDTO {
   String id;
   String name;
-  String parentFolderId;
+  String parentDirectory;
   List<String> folders;
   List<String> files;
   FolderDTO({
     this.id = '',
     this.name = '',
-    this.parentFolderId = '',
+    this.parentDirectory = '',
     this.folders = const [],
     this.files = const [],
   });
@@ -76,9 +77,13 @@ class FolderDTO {
     return FolderDTO(
       id: f.id,
       name: f.name,
-      parentFolderId: f.parentFolderId,
+      parentDirectory: f.parentDirectory,
       folders: f.folders.map((e) => e.id).toList(),
       files: f.files.map((e) => e.id).toList(),
     );
   }
+
+  factory FolderDTO.fromJson(Map<String, dynamic> json) => _$FolderDTOFromJson(json);
+
+  Map<String, dynamic> toJson() => _$FolderDTOToJson(this);
 }

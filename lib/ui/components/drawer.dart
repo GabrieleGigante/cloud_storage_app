@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:cloud_storage/core/api/v1.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class LeadingDrawer extends StatelessWidget {
   const LeadingDrawer({super.key});
@@ -25,7 +27,12 @@ class LeadingDrawer extends StatelessWidget {
             width: double.infinity,
             child: TextButton(
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
-                onPressed: () {},
+                onPressed: () async {
+                  try {
+                    await API.logout();
+                  } catch (e) {}
+                  context.go('/');
+                },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: const [Icon(Icons.logout), SizedBox(width: 8), Text('Logout')],

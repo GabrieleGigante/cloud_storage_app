@@ -1,82 +1,94 @@
-// import 'dart:async';
-// import 'dart:convert';
-// import 'dart:io';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
-// import 'package:cloud_storage/core/api/types.dart';
-// import 'package:http/http.dart' as http show get, post, Request, Response, ByteStream;
+import 'package:cloud_storage/core/api/types.dart';
+import 'package:http/http.dart' as http
+    show Client, Request, MultipartRequest, BaseRequest, Response, post, MultipartFile;
+import 'package:shared_preferences/shared_preferences.dart';
 
-// typedef HTTPGet = Future<http.Response> Function(
-//   Uri url, {
-//   Map<String, String>? headers,
-// });
-// typedef HTTPPost = Future<http.Response> Function(
-//   Uri url, {
-//   Map<String, String>? headers,
-//   Object? body,
-//   Encoding? encoding,
-// });
+import '../files/services/token.dart';
 
-// class HTTPClient {
-//   HTTPClient._();
+class HTTPClient {
+  HTTPClient._();
 
-//   static final HTTPClient _instance = HTTPClient._();
+  static final HTTPClient _instance = HTTPClient._();
+  final http.Client client = http.Client();
 
-//   factory HTTPClient() {
-//     return _instance;
-//   }
-//   Future<HTTPResponse> request(String method, String url,
-//       {Map<String, String>? headers, dynamic body, int timeout = 20}) async {
-//     late final HTTPGet client;
-//     switch (method) {
-//       case 'GET':
-//         client = http.get;
-//         break;
-//       // case 'POST':
-//       //   client = http.post;
-//       //   break;
-//       default:
-//     }
-//     bool clientClosed = false;
-//     try {
-//       final duration = Duration(seconds: timeout);
-//       Future.delayed(duration, () {
-//         if (!clientClosed) {
-//           throw TimeoutException('Request timed out', duration);
-//         }
-//       });
-//       final request = http.Request(method, Uri.parse(url));
-//       request.followRedirects = true;
-//       request.headers.addAll(headers ?? {});
-//       request.body = body.toString();
-//       final response = await client(request.url, headers: request.headers);
-//       final responseString = await response.stream.bytesToString();
-//       if (response.statusCode >= 400) {
-//         return HTTPResponse(response.statusCode, {}, response.headers, error: responseString);
-//       }
-//       final Map<String, dynamic> responseBodyMap = jsonDecode(responseString);
-//       return HTTPResponse(response.statusCode, responseBodyMap, response.headers);
-//     } catch (e) {
-//       return HTTPResponse(HttpStatus.internalServerError, {}, {}, error: e.toString());
-//     } finally {
-//       clientClosed = true;
-//     }
-//   }
+  factory HTTPClient() {
+    return _instance;
+  }
+  Future<http.Response> request(String method, String url,
+      {Map<String, String>? headers,
+      dynamic body,
+      Duration timeout = const Duration(seconds: 20)}) async {
+    final request = http.Request(method, Uri.parse(url));
+    request.followRedirects = true;
+    request.headers.addAll(headers ?? {});
+    request.body = '$body';
+    await _checkAuthentication(request);
+    final response = await client.send(request).timeout(timeout);
+    final httpRes = await http.Response.fromStream(response);
+    print('RESPONSE FROM STREAM');
+    print(httpRes.body);
+    return httpRes;
+  }
 
-//   Future<HTTPResponse> get(String url, {Map<String, String>? headers}) =>
-//       request('GET', url, headers: headers);
+  Future<void> _checkAuthentication(http.BaseRequest req) async {
+    final accessToken = req.headers['Authorization'] ?? '';
+    if (accessToken.isEmpty) {
+      return;
+    }
+    final token = accessToken.split(' ').last;
+    if (JWT.isExpired(token)) {
+      final sp = await SharedPreferences.getInstance();
+      final refreshToken = sp.getString('refresh_token') ?? '';
+      if (refreshToken.isEmpty) {
+        throw Exception('No refresh token found');
+      }
+      final baseUrl = req.url.origin;
+      log(baseUrl);
+      final res = await http.post(Uri.parse('$baseUrl/auth/refresh'), body: {
+        'access_token': token,
+        'refresh_token': refreshToken,
+      });
+      if (res.statusCode >= 400) {
+        throw APIException.fromResponse(res);
+      }
+      final json = jsonDecode(res.body);
+      sp.setString('refresh_token', json['refresh_token']);
+      sp.setString('token', json['access_token']);
+      req.headers['Authorization'] = 'Bearer ${json['access_token']}';
+    }
+  }
 
-//   Future<HTTPResponse> post(String url, {Map<String, String>? headers, dynamic body}) =>
-//       request('POST', url, headers: headers, body: body);
+  Future<http.Response> get(String url, {Map<String, String>? headers}) =>
+      request('GET', url, headers: headers);
 
-//   Future<HTTPResponse> put(String url, {Map<String, String>? headers, dynamic body}) =>
-//       request('PUT', url, headers: headers, body: body);
+  Future<http.Response> post(String url, {Map<String, String>? headers, dynamic body}) =>
+      request('POST', url, headers: headers, body: body);
 
-//   Future<HTTPResponse> delete(String url, {Map<String, String>? headers, dynamic body}) =>
-//       request('DELETE', url, headers: headers, body: body);
+  Future<http.Response> put(String url, {Map<String, String>? headers, dynamic body}) =>
+      request('PUT', url, headers: headers, body: body);
 
-//   Future<HTTPResponse> patch(String url, {Map<String, String>? headers, dynamic body}) =>
-//       request('PATCH', url, headers: headers, body: body);
+  Future<http.Response> delete(String url, {Map<String, String>? headers, dynamic body}) =>
+      request('DELETE', url, headers: headers, body: body);
 
-//   Future<HTTPResponse> head(String url, {Map<String, String>? headers, dynamic body}) =>
-//       request('HEAD', url, headers: headers, body: body);
-// }
+  Future<http.Response> patch(String url, {Map<String, String>? headers, dynamic body}) =>
+      request('PATCH', url, headers: headers, body: body);
+
+  Future<http.Response> head(String url, {Map<String, String>? headers, dynamic body}) =>
+      request('HEAD', url, headers: headers, body: body);
+
+  Future<http.Response> multipart(String method, String url, String fileLocation,
+      {Map<String, String>? headers}) async {
+    final request = http.MultipartRequest(method, Uri.parse(url));
+    request.headers.addAll(headers ?? {});
+    request.files.add(await http.MultipartFile.fromPath('file', fileLocation));
+    await _checkAuthentication(request);
+    final response = await client.send(request);
+    return http.Response.fromStream(response);
+  }
+}
