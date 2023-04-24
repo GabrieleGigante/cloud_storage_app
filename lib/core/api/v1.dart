@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_storage/core/api/http_client.dart';
 import 'package:cloud_storage/core/files/models/file.dart';
+import 'package:cloud_storage/core/files/services/extension_to_mime.dart';
 import 'package:cloud_storage/core/files/services/token.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -94,12 +96,11 @@ class API {
   //   await setFolder(Folder(id: id, name: newName, files: [], folders: []));
   // }
 
-  static Future<File> uploadFile(PlatformFile f, String folderId) async {
-    print(f);
+  /// Get file from id.
+  static Future<File> getFile(String id) async {
     final sp = await SharedPreferences.getInstance();
     final token = sp.getString('token') ?? '';
-    final res = await http.multipart('POST', '$baseUrl/file/', f.path ?? '', headers: {
-      'cwd': folderId,
+    final res = await http.get('$baseUrl/file/$id', headers: {
       'Authorization': 'Bearer $token',
     });
     if (res.statusCode >= 400) {
@@ -107,5 +108,49 @@ class API {
     }
     final json = jsonDecode(res.body);
     return File.fromJson(json);
+  }
+
+  static Future<File> uploadFile(PlatformFile f, String folderId) async {
+    print(f);
+    final sp = await SharedPreferences.getInstance();
+    final token = sp.getString('token') ?? '';
+    final mime = extensionToMimetype(f.extension ?? '');
+    print(mime);
+    final res = await http.multipart('POST', '$baseUrl/file/', f.path ?? '', headers: {
+      'cwd': folderId,
+      'Authorization': 'Bearer $token',
+      'Content-type': mime,
+    });
+    if (res.statusCode >= 400) {
+      throw APIException.fromResponse(res);
+    }
+    final json = jsonDecode(res.body);
+    return File.fromJson(json);
+  }
+
+  static Future<void> deleteFile(String id) async {
+    final sp = await SharedPreferences.getInstance();
+    final token = sp.getString('token') ?? '';
+    final res = await http.delete('$baseUrl/file/$id', headers: {
+      'Authorization': 'Bearer $token',
+    });
+    if (res.statusCode >= 400) {
+      throw APIException.fromResponse(res);
+    }
+  }
+
+  static Future<Uint8List> downloadFile(String id) async {
+    final sp = await SharedPreferences.getInstance();
+    final token = sp.getString('token') ?? '';
+    final res = await http.get(
+      '$baseUrl/download/$id',
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (res.statusCode >= 400) {
+      throw APIException.fromResponse(res);
+    }
+    return res.bodyBytes;
   }
 }

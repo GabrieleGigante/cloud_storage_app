@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_storage/core/api/types.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http
     show Client, Request, MultipartRequest, BaseRequest, Response, post, MultipartFile;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,8 +86,13 @@ class HTTPClient {
   Future<http.Response> multipart(String method, String url, String fileLocation,
       {Map<String, String>? headers}) async {
     final request = http.MultipartRequest(method, Uri.parse(url));
-    request.headers.addAll(headers ?? {});
-    request.files.add(await http.MultipartFile.fromPath('file', fileLocation));
+    for (final key in headers?.keys ?? <String>[]) {
+      request.headers[key.toLowerCase()] = headers?[key] ?? '';
+    }
+    final ct = request.headers['content-type'] ?? 'application/octet-stream';
+    request.files.add(
+        await http.MultipartFile.fromPath('file', fileLocation, contentType: MediaType.parse(ct)));
+
     await _checkAuthentication(request);
     final response = await client.send(request);
     return http.Response.fromStream(response);

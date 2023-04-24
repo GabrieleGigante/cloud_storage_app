@@ -4,20 +4,22 @@ import '../../api/v1.dart';
 import '../models/file.dart';
 import '../models/folder.dart';
 import '../services/extension_to_mime.dart';
+import 'file_provider.dart';
 
 // final folderRepositoryProvider = Provider((ref) => FolderRepository(ref));
 
 final folderFromId = StateNotifierProviderFamily<FolderNotifier, AsyncValue<Folder>, String>(
-    (ref, String id) => FolderNotifier(id));
+    (ref, String id) => FolderNotifier(ref, id));
 
 class FolderNotifier extends StateNotifier<AsyncValue<Folder>> {
   final String folderId;
+  final StateNotifierProviderRef ref;
 
-  FolderNotifier(this.folderId) : super(const AsyncLoading()) {
-    getFolder();
+  FolderNotifier(this.ref, this.folderId) : super(const AsyncLoading()) {
+    get();
   }
 
-  Future<void> getFolder() async {
+  Future<void> get() async {
     state = const AsyncLoading();
     try {
       final folder = await API.getFolder(folderId);
@@ -28,7 +30,7 @@ class FolderNotifier extends StateNotifier<AsyncValue<Folder>> {
     }
   }
 
-  Future<void> storeFolder(Folder folder) async {
+  Future<void> store(Folder folder) async {
     try {
       await API.setFolder(folder);
       if (folder.parentDirectory == folderId) {
@@ -44,7 +46,7 @@ class FolderNotifier extends StateNotifier<AsyncValue<Folder>> {
     }
   }
 
-  Future<void> deleteFolder(String id) async {
+  Future<void> delete(String id) async {
     try {
       final currentFolder = state.asData?.value;
       if (currentFolder == null) {
@@ -74,6 +76,23 @@ class FolderNotifier extends StateNotifier<AsyncValue<Folder>> {
       print(e);
       print(stack);
       return true;
+    }
+  }
+
+  Future<void> deleteFile(String id) async {
+    try {
+      final currentFolder = state.asData?.value;
+      if (currentFolder == null) {
+        return;
+      }
+      if (currentFolder.files.where((e) => e.id == id).isNotEmpty) {
+        await API.deleteFile(id);
+        state = AsyncData(
+            currentFolder.copyWith(files: currentFolder.files.where((e) => e.id != id).toList()));
+      }
+    } catch (e, stack) {
+      print(stack);
+      state = AsyncError(e, stack);
     }
   }
 }

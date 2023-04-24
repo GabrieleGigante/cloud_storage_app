@@ -77,7 +77,7 @@ class NewFileOrDirDialog extends ConsumerWidget {
                   files: [],
                 );
                 // ref.read(folderFromId(newFolder.parentFolderId)).
-                notifier.storeFolder(newFolder);
+                notifier.store(newFolder);
               }
               context.pop();
             },

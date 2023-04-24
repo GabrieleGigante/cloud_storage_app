@@ -15,7 +15,7 @@ class LoadingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: backgroundColor,
       child: Center(
         child: SizedBox(
           width: size,

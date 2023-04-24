@@ -48,6 +48,7 @@ dependencies:
   connectivity_plus: ^3.0.4
   http: ^0.13.5
   dartz: ^0.10.1
+  crypto: ^3.0.2
 
 dev_dependencies:
   flutter_test:

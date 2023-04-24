@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/api/v1.dart';
 
 class LoginPage extends HookConsumerWidget {
@@ -111,15 +112,17 @@ class LoginPage extends HookConsumerWidget {
     if (isLoading.value) {
       return;
     }
+    final sp = await SharedPreferences.getInstance();
     API.baseUrl = 'http://localhost:8080';
     isLoading.value = true;
     try {
       log('$email, $pw');
       final token = await API.login(email, pw);
       print(token);
-
+      final root = token['data']?['root'] ?? 'test-root';
+      sp.setString('rootDir', root);
       // ignore: use_build_context_synchronously
-      context.go('/test-root');
+      context.go('/$root');
     } catch (e) {
       print(e);
     }

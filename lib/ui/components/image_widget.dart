@@ -9,8 +9,7 @@ class ImageWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final contentValue = ref.watch(contentFromId(id));
-
+    final contentValue = ref.watch(contentProvider(id));
     return contentValue.when(
       data: (data) {
         if (data == null) {

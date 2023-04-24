@@ -69,7 +69,7 @@ class FolderPage extends ConsumerWidget {
                     width: 50,
                     child: Icon(Icons.folder),
                   ),
-                  trailing: PopupMenu(onDelete: () async => notifier.deleteFolder(folder.id)),
+                  trailing: PopupMenu(onDelete: () async => notifier.delete(folder.id)),
                   onTap: () => context.push('/${folder.id}'),
                   title: Text(folder.name),
                   subtitle: Text(folder.id.split('-').last),
@@ -77,7 +77,7 @@ class FolderPage extends ConsumerWidget {
               for (File file in currentDir.files)
                 ListTile(
                     leading: SizedBox(height: 50, width: 50, child: PreviewWidget(file)),
-                    trailing: PopupMenu(onDelete: () async => notifier.deleteFolder(id)),
+                    trailing: PopupMenu(onDelete: () async => notifier.deleteFile(file.id)),
                     onTap: () => context.push('/file/${file.id}'),
                     title: Text(file.name),
                     subtitle: Builder(builder: (context) {

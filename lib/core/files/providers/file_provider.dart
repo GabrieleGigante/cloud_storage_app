@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../api/v1.dart';
 import '../models/file.dart';
 import '../repositories/file_repository.dart';
 
@@ -14,22 +15,26 @@ final fileFromId = StateNotifierProvider.family<FileNotifier, AsyncValue<File>, 
 
 class FileNotifier extends StateNotifier<AsyncValue<File>> {
   final String fileId;
-  final StateNotifierProviderRef<FileNotifier, AsyncValue<File>> ref;
+  final StateNotifierProviderRef ref;
 
   FileNotifier(this.ref, this.fileId) : super(const AsyncLoading()) {
-    // get();
+    get();
   }
 
-  // Future<void> get() async {
-  // state = const AsyncLoading();
-  // try {
-  //   final file = await API.getFile(fileId);
-  //   state = AsyncData(file);
-  // } catch (e, stack) {
-  //   print(stack);
-  //   state = AsyncError(e, stack);
-  // }
-  // }
+  Future<void> get() async {
+    state = const AsyncLoading();
+    try {
+      final file = await API.getFile(fileId);
+      state = AsyncData(file);
+    } catch (e, stack) {
+      print(stack);
+      state = AsyncError(e, stack);
+    }
+  }
+
+  Future<void> override(File file) async {
+    state = AsyncData(file);
+  }
 
   // Future<void> store(File file) async {
   // try {

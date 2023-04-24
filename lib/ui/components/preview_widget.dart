@@ -12,6 +12,6 @@ class PreviewWidget extends StatelessWidget {
     if (!file.isImage) {
       return const Icon(Icons.document_scanner);
     }
-    return ImageWidget('preview_${file.id}');
+    return ImageWidget(file.id);
   }
 }
