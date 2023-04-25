@@ -4,6 +4,9 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
+import '../services/save_file.dart'
+    if (dart.library.html) '../services/save_file_web.dart'
+    if (dart.library.io) '../services/save_file_mobile.dart';
 
 part 'file.g.dart';
 
@@ -44,6 +47,19 @@ class File {
   Future<bool> verifyCid(Uint8List content) async {
     final digest = sha256.convert(content);
     return digest.toString() == cid;
+  }
+
+  // returns true if the operation is successful
+  Future<bool> save(Uint8List content) async {
+    if (!await verifyCid(content)) {
+      return false;
+    }
+    try {
+      await saveFile(this, content);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   factory File.fromJson(Map<String, dynamic> json) => _$FileFromJson(json);

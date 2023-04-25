@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_storage/core/api/v1.dart';
 import 'package:cloud_storage/ui/components/popup_menu.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' show AnchorElement;
 
@@ -57,16 +59,11 @@ class FileViewer extends HookConsumerWidget {
           onPressed: () async {
             Uint8List val = await ref.read(contentProvider(id).future);
             if (!await file.verifyCid(val)) {
-              //TODO: Show error
+              showDialog(
+                  context: context, builder: (_) => const Dialog(child: Text('Invalid cid')));
               return;
             }
-            if (kIsWeb) {
-              final b64 = base64Encode(val);
-              AnchorElement(href: 'data:application/octet-stream;base64,$b64')
-                ..setAttribute('download', file.name)
-                ..click();
-              return;
-            }
+            file.save(val);
           },
           child: const Icon(Icons.download),
         ),

@@ -5,6 +5,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_storage/core/api/types.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http
     show Client, Request, MultipartRequest, BaseRequest, Response, post, MultipartFile;
@@ -33,7 +35,7 @@ class HTTPClient {
     final response = await client.send(request).timeout(timeout);
     final httpRes = await http.Response.fromStream(response);
     print('RESPONSE FROM STREAM');
-    print(httpRes.body);
+    if (httpRes.body.length < 1000) print(httpRes.body);
     return httpRes;
   }
 
@@ -83,17 +85,30 @@ class HTTPClient {
   Future<http.Response> head(String url, {Map<String, String>? headers, dynamic body}) =>
       request('HEAD', url, headers: headers, body: body);
 
-  Future<http.Response> multipart(String method, String url, String fileLocation,
+  Future<http.Response> multipart(String method, String url, PlatformFile file,
       {Map<String, String>? headers}) async {
     final request = http.MultipartRequest(method, Uri.parse(url));
+    await _checkAuthentication(request);
     for (final key in headers?.keys ?? <String>[]) {
       request.headers[key.toLowerCase()] = headers?[key] ?? '';
     }
     final ct = request.headers['content-type'] ?? 'application/octet-stream';
-    request.files.add(
-        await http.MultipartFile.fromPath('file', fileLocation, contentType: MediaType.parse(ct)));
-
-    await _checkAuthentication(request);
+    if (kIsWeb) {
+      final bytes = file.bytes!;
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        contentType: MediaType.parse(ct),
+        filename: file.name,
+      ));
+    } else {
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        file.path!,
+        contentType: MediaType.parse(ct),
+        filename: file.name,
+      ));
+    }
     final response = await client.send(request);
     return http.Response.fromStream(response);
   }

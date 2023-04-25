@@ -113,7 +113,6 @@ class LoginPage extends HookConsumerWidget {
       return;
     }
     final sp = await SharedPreferences.getInstance();
-    API.baseUrl = 'http://localhost:8080';
     isLoading.value = true;
     try {
       log('$email, $pw');

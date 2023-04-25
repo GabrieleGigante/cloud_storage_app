@@ -111,12 +111,11 @@ class API {
   }
 
   static Future<File> uploadFile(PlatformFile f, String folderId) async {
-    print(f);
     final sp = await SharedPreferences.getInstance();
     final token = sp.getString('token') ?? '';
     final mime = extensionToMimetype(f.extension ?? '');
     print(mime);
-    final res = await http.multipart('POST', '$baseUrl/file/', f.path ?? '', headers: {
+    final res = await http.multipart('POST', '$baseUrl/file/', f, headers: {
       'cwd': folderId,
       'Authorization': 'Bearer $token',
       'Content-type': mime,

@@ -1,3 +1,4 @@
+import 'package:cloud_storage/core/api/v1.dart';
 import 'package:cloud_storage/core/files/models/folder.dart';
 import 'package:cloud_storage/core/files/providers/cwd_provider.dart';
 import 'package:cloud_storage/router.dart';
@@ -13,6 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
   await initCache();
+  API.baseUrl = 'http://93.144.14.182';
   final SharedPreferences sp = await SharedPreferences.getInstance();
   final GoRouter router = initRouter(sp);
   runApp(MyApp(router));
