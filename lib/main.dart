@@ -14,7 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
   await initCache();
-  API.baseUrl = 'http://93.144.14.182';
+  API.baseUrl = 'https://ggcldstrg.duckdns.org';
   final SharedPreferences sp = await SharedPreferences.getInstance();
   final GoRouter router = initRouter(sp);
   runApp(MyApp(router));
